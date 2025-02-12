@@ -44,4 +44,4 @@ next-env.d.ts
 .env
 
 # drizzle generation file
-./drizzle
+/drizzle
