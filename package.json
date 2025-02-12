@@ -13,17 +13,16 @@
     "db:push": "drizzle-kit push"
   },
   "dependencies": {
-    "@emotion/react": "^11.14.0",
-    "@emotion/styled": "^11.14.0",
-    "@mui/icons-material": "^6.4.4",
-    "@mui/material": "^6.4.4",
+    "@phosphor-icons/react": "^2.1.7",
+    "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "pg": "^8.13.2",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "zustand": "^5.0.3"
   },
   "devDependencies": {
     "@types/node": "^20",

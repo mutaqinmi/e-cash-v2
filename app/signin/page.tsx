@@ -1,0 +1,63 @@
+'use client'
+import Button from "@/src/components/button";
+import Container from "@/src/components/container";
+import InputField from "@/src/components/input-field";
+import PasswordField from "@/src/components/password-field";
+import Form from "next/form";
+import { useCallback, useState } from "react";
+import axios, { AxiosResponse } from "axios";
+import Loading from "@/src/components/loading";
+import Body from "@/src/components/body";
+import { create } from "zustand";
+
+interface ComponentState {
+    errorSnackBarMessage: string | null;
+    setErrorSnackBarMessage: (message: string | null) => void;
+    successSnackBarMessage: string | null;
+    setSuccessSnackBarMessage: (message: string | null) => void;
+}
+
+const useComponent = create<ComponentState>((set) => ({
+    errorSnackBarMessage: null,
+    setErrorSnackBarMessage: (message: string | null) => set(() => ({errorSnackBarMessage: message})),
+    successSnackBarMessage: null,
+    setSuccessSnackBarMessage: (message: string | null) => set(() => ({successSnackBarMessage: message}))
+}));
+
+export default function Page() {
+    const {errorSnackBarMessage, setErrorSnackBarMessage, successSnackBarMessage, setSuccessSnackBarMessage} = useComponent();
+    const [isLoading, setIsLoading] = useState(false);
+
+    const authUser = useCallback(async (formData: FormData) => {
+        return await axios.post(`${process.env.API_URL}/auth/signin`, {
+            username: formData.get('username'),
+            password: formData.get('password')
+        }).then((response: AxiosResponse) => {
+            if(response.status === 200){
+                setSuccessSnackBarMessage('Login berhasil!');
+            }
+        }).catch((error) => {
+            setErrorSnackBarMessage('Login gagal!');
+        }).finally(() => setIsLoading(false));
+    }, []);
+
+    const signInHandler = (formData: FormData) => {setIsLoading(true); authUser(formData)};
+
+    return (
+        isLoading ? <Loading/> : <Body errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage}>
+            <Container className="h-screen w-screen flex justify-center items-center bg-gray-100">
+                <Container className="w-96 bg-white shadow-md rounded-lg p-6">
+                    <div className="mb-8">
+                        <h1 className="text-2xl font-semibold">Masuk</h1>
+                        <span>Masuk untuk melanjutkan.</span>
+                    </div>
+                    <Form action={signInHandler} formMethod="POST">
+                        <InputField label="Username"/>
+                        <PasswordField label="Password"/>
+                        <Button formButton label="Masuk" className="w-full mt-8"/>
+                    </Form>
+                </Container>
+            </Container>
+        </Body>
+    )
+}
