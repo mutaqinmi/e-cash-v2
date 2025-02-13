@@ -14,9 +14,11 @@
   },
   "dependencies": {
     "@phosphor-icons/react": "^2.1.7",
+    "argon2": "^0.41.1",
     "axios": "^1.7.9",
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
+    "jsonwebtoken": "^9.0.2",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "pg": "^8.13.2",
@@ -25,6 +27,7 @@
     "zustand": "^5.0.3"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.8",
     "@types/node": "^20",
     "@types/pg": "^8.11.11",
     "@types/react": "^19",

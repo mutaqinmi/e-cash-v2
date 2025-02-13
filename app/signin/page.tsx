@@ -5,7 +5,7 @@ import InputField from "@/src/components/input-field";
 import PasswordField from "@/src/components/password-field";
 import Form from "next/form";
 import { useCallback, useState } from "react";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import Loading from "@/src/components/loading";
 import Body from "@/src/components/body";
 import { create } from "zustand";
@@ -36,8 +36,9 @@ export default function Page() {
             if(response.status === 200){
                 setSuccessSnackBarMessage('Login berhasil!');
             }
-        }).catch((error) => {
-            setErrorSnackBarMessage('Login gagal!');
+        }).catch((error: AxiosError) => {
+            const { message } = error.response?.data as { message: string };
+            setErrorSnackBarMessage(message);
         }).finally(() => setIsLoading(false));
     }, []);
 

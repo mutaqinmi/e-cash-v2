@@ -1,51 +1,51 @@
 import { date, decimal, index, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 
-export const user = pgTable('user', {
-    userID: serial('userID').primaryKey(),
-    namaLengkap: varchar('namaLengkap', {length: 255}),
-    username: varchar('username', {length: 50}),
+export const employee = pgTable('employee', {
+    employee_id: serial('employee_id').primaryKey(),
+    full_name: varchar('full_name', {length: 255}),
+    user_name: varchar('user_name', {length: 50}),
     password: varchar('password', {length: 255}),
-    hakAkses: varchar('hakAkses', {length: 50}),
+    role: varchar('role', {length: 50}),
 }, (table) => [
-    index("username_idx").on(table.username)
+    index("user_name_idx").on(table.user_name)
 ]);
-export const userType = user.$inferSelect;
+export type employeeType = typeof employee.$inferSelect;
 
-export const pelanggan = pgTable('pelanggan', {
-    pelangganID: serial('pelangganID').primaryKey(),
-    namaPelanggan: varchar('namaPelanggan', {length: 255}),
-    alamat: text('alamat'),
-    nomorTelepon: varchar('nomorTelepon', {length: 15}),
+export const customer = pgTable('customer', {
+    customer_id: serial('customer_id').primaryKey(),
+    customer_name: varchar('customer_name', {length: 255}),
+    customer_address: text('customer_address'),
+    phone_number: varchar('phone_number', {length: 15}),
 }, (table) => [
-    index("nama_pelanggan_idx").on(table.namaPelanggan),
-    index("nomor_telepon_idx").on(table.nomorTelepon)
+    index("customer_name_idx").on(table.customer_name),
+    index("phone_number_idx").on(table.phone_number)
 ]);
-export const pelangganType = pelanggan.$inferSelect;
+export type customerType = typeof customer.$inferSelect;
 
-export const produk = pgTable('produk', {
-    produkID: serial('produkID').primaryKey(),
-    namaProduk: varchar('namaProduk', {length: 255}),
-    harga: decimal('harga', {precision: 10, scale: 6}),
-    stok: integer('stok'),
+export const product = pgTable('product', {
+    product_id: serial('product_id').primaryKey(),
+    product_name: varchar('product_name', {length: 255}),
+    price: decimal('price', {precision: 10, scale: 6}),
+    stock: integer('stock'),
 }, (table) => [
-    index("nama_produk_idx").on(table.namaProduk)
+    index("product_name_idx").on(table.product_name)
 ]);
-export const produkType = produk.$inferSelect;
+export type productType = typeof product.$inferSelect;
 
-export const penjualan = pgTable('penjualan', {
-    penjualanID: serial('penjualanID').primaryKey(),
-    tanggalPenjualan: date('tanggalPenjualan').default('NOW()'),
-    totalHarga: decimal('totalHarga', {precision: 10, scale: 6}),
-    pelangganID: integer('pelangganID').references(() => pelanggan.pelangganID),
-    userID: integer('userID').references(() => user.userID),
+export const sale = pgTable('sale', {
+    sale_id: serial('sale_id').primaryKey(),
+    sale_date: date('sale_date').default('NOW()'),
+    total_price: decimal('total_price', {precision: 10, scale: 6}),
+    customer_id: integer('customer_id').references(() => customer.customer_id),
+    employee_id: integer('employee_id').references(() => employee.employee_id),
 });
-export const penjualanType = penjualan.$inferSelect;
+export type saleType = typeof sale.$inferSelect;
 
-export const detailPenjualan = pgTable('detailPenjualan', {
-    detailID: serial('detailID').primaryKey(),
-    penjualanID: integer('penjualanID').references(() => penjualan.penjualanID),
-    produkID: integer('produkID').references(() => produk.produkID),
-    jumlahProduk: integer('jumlahProduk'),
+export const saleDetail = pgTable('saleDetail', {
+    detail_id: serial('detail_id').primaryKey(),
+    sale_id: integer('sale_id').references(() => sale.sale_id),
+    product_id: integer('product_id').references(() => product.product_id),
+    quantity: integer('quantity'),
     subtotal: decimal('subtotal', {precision: 10, scale: 6}),
 });
-export const detailPenjualanType = detailPenjualan.$inferSelect;
+export type saleDetailType = typeof saleDetail.$inferSelect;

@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import ErrorSnackbar from "./error-snackbar";
 import SuccessSnackbar from "./success-snackbar";
 
@@ -8,6 +9,14 @@ export default function Body(props: {
     successSnackBarMessage?: string | null;
     successSnackBarController?: (message: string | null) => void;
 }){
+    useEffect(() => {
+        if (props.errorSnackBarMessage != null && props.successSnackBarMessage) {
+            props.errorSnackBarController!(null);
+        } else if(props.successSnackBarMessage != null && props.errorSnackBarMessage){
+            props.successSnackBarController!(null);
+        }
+    }, [props.errorSnackBarMessage, props.successSnackBarMessage]);
+
     return (
         <>
             {props.children}

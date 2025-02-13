@@ -1,6 +1,7 @@
 import readline from 'readline';
 import pg from 'pg';
 import { exec } from 'node:child_process';
+import argon2 from 'argon2';
 
 const rl = readline.createInterface({
     input: process.stdin,
@@ -38,13 +39,12 @@ const main = async () => {
             await generate();
             await migrate();
 
+            await createNewAdministrator();
             close();
         } else {
             console.log('Database ecash already exists, skipped creation');
 
-            await generate();
-            await migrate();
-
+            await createNewAdministrator();
             close();
         }
     } catch (error) {
@@ -87,6 +87,48 @@ async function migrate() {
         });
     } catch (error) {
         console.log("Error migrating database\n", error);
+    }
+}
+
+async function createNewAdministrator(){
+    const databaseURL = "postgres://postgres:postgres@localhost:5432/ecash";
+    const ecash = new pg.Client({ connectionString: databaseURL });
+
+    try {
+        await ecash.connect();
+
+        const checkAdministrator = await ecash.query('SELECT * FROM employee');
+
+        if(checkAdministrator.rowCount === 0){
+            const confirmCreation = await question('No administrator found. Do you want to create one? (y/n) ');
+
+            if(confirmCreation.toLowerCase() !== 'y'){
+                console.log('Administrator creation cancelled');
+                ecash.end();
+            }
+
+            const full_name = await question('Administrator full name: ');
+            const user_name = await question('Administrator username: ');
+            const password = await question('Administrator password: ');
+            const role = 'administrator';
+
+            const hashed_password = await argon2.hash(password, {
+                type: argon2.argon2id,
+                memoryCost: 2 ** 16,
+                timeCost: 3,
+                parallelism: 1
+            });
+
+            await ecash.query('INSERT INTO employee(full_name, user_name, password, role) VALUES ($1, $2, $3, $4)', [full_name, user_name, hashed_password, role]);
+            console.log('Administrator created successfully!');
+
+            ecash.end();
+        } else  {
+            console.log('Administrator creation skipped, already exists');
+            ecash.end();
+        }
+    } catch (error) {
+        console.log("Error creating new administrator\n", error);
     }
 }
 
