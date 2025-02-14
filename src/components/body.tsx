@@ -3,6 +3,7 @@ import ErrorSnackbar from "./error-snackbar";
 import SuccessSnackbar from "./success-snackbar";
 
 export default function Body(props: {
+    className?: string;
     children: React.ReactNode;
     errorSnackBarMessage?: string | null;
     errorSnackBarController?: (message: string | null) => void;
@@ -18,10 +19,10 @@ export default function Body(props: {
     }, [props.errorSnackBarMessage, props.successSnackBarMessage]);
 
     return (
-        <>
+        <div className={props.className}>
             {props.children}
             { props.errorSnackBarMessage ? <ErrorSnackbar message={props.errorSnackBarMessage} snackbarController={props.errorSnackBarController} /> : null }
             { props.successSnackBarMessage ? <SuccessSnackbar message={props.successSnackBarMessage} snackbarController={props.successSnackBarController} /> : null }
-        </>
+        </div>
     )
 }

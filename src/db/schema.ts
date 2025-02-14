@@ -25,7 +25,7 @@ export type customerType = typeof customer.$inferSelect;
 export const product = pgTable('product', {
     product_id: serial('product_id').primaryKey(),
     product_name: varchar('product_name', {length: 255}),
-    price: decimal('price', {precision: 10, scale: 6}),
+    price: integer('price'),
     stock: integer('stock'),
 }, (table) => [
     index("product_name_idx").on(table.product_name)
@@ -35,7 +35,7 @@ export type productType = typeof product.$inferSelect;
 export const sale = pgTable('sale', {
     sale_id: serial('sale_id').primaryKey(),
     sale_date: date('sale_date').default('NOW()'),
-    total_price: decimal('total_price', {precision: 10, scale: 6}),
+    total_price: integer('total_price'),
     customer_id: integer('customer_id').references(() => customer.customer_id),
     employee_id: integer('employee_id').references(() => employee.employee_id),
 });
@@ -46,6 +46,6 @@ export const saleDetail = pgTable('saleDetail', {
     sale_id: integer('sale_id').references(() => sale.sale_id),
     product_id: integer('product_id').references(() => product.product_id),
     quantity: integer('quantity'),
-    subtotal: decimal('subtotal', {precision: 10, scale: 6}),
+    subtotal: integer('subtotal'),
 });
 export type saleDetailType = typeof saleDetail.$inferSelect;
