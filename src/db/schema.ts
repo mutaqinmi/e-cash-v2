@@ -7,7 +7,8 @@ export const employee = pgTable('employee', {
     password: varchar('password', {length: 255}),
     role: varchar('role', {length: 50}),
 }, (table) => [
-    index("user_name_idx").on(table.user_name)
+    index("user_name_idx").on(table.user_name),
+    index("name_idx").on(table.full_name)
 ]);
 export type employeeType = typeof employee.$inferSelect;
 

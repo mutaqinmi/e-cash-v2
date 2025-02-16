@@ -110,7 +110,7 @@ async function createNewAdministrator(){
             const full_name = await question('Administrator full name: ');
             const user_name = await question('Administrator username: ');
             const password = await question('Administrator password: ');
-            const role = 'administrator';
+            const role = 'Administrator';
 
             const hashed_password = await argon2.hash(password, {
                 type: argon2.argon2id,

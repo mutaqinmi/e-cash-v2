@@ -17,14 +17,14 @@ export async function middleware(req: NextRequest){
     }).then(res => res).catch(err => err.response);
     
     if (token && req.nextUrl.pathname === ("/signin")){
-        if (authenticatedUser.data.data.role === "administrator"){
+        if (authenticatedUser.data.data.role === "Administrator"){
             return NextResponse.rewrite(new URL('/admin', req.url));
         } else {
             return NextResponse.rewrite(new URL('/cashier', req.url));
         }
-    } else if (token && req.nextUrl.pathname === ("/admin") && authenticatedUser.data.data.role !== "administrator"){
+    } else if (token && req.nextUrl.pathname === ("/admin") && authenticatedUser.data.data.role !== "Administrator"){
         return NextResponse.rewrite(new URL('/cashier', req.url));
-    } else if (token && req.nextUrl.pathname === ("/cashier") && authenticatedUser.data.data.role !== "kasir"){
+    } else if (token && req.nextUrl.pathname === ("/cashier") && authenticatedUser.data.data.role !== "Kasir"){
         return NextResponse.rewrite(new URL('/admin', req.url));
     }
 

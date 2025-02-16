@@ -37,6 +37,9 @@ export default function Page() {
         }).then((response: AxiosResponse) => {
             if(response.status === 200){
                 setSuccessSnackBarMessage('Login berhasil!');
+                const localStorage = window.localStorage;
+                localStorage.setItem('session_user_name', response.data.data.name);
+                localStorage.setItem('session_user_role', response.data.data.role);
 
                 response.data.data.role === "administrator" ? router.push("/admin") : router.push("/cashier");
             }
