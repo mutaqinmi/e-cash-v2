@@ -121,7 +121,7 @@ export default function Product(){
                             <tr>
                                 <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.product_name!.localeCompare(b.product_name!)))}>
                                     <div className="flex justify-center items-center gap-2">
-                                        <span>Nama Produk</span>
+                                        <span>Nama Barang</span>
                                         <CaretUpDown className="text-gray-500"/>
                                     </div>
                                 </th>

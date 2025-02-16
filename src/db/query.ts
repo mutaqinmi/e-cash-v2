@@ -148,3 +148,65 @@ export class Product {
         }
     }
 }
+
+export class Customer {
+    public static get get(){
+        async function all() {
+            try {
+                return await db.select().from(table.customer);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function byId(customer_id: number) {
+            try {
+                return await db.select().from(table.customer).where(eq(table.customer.customer_id, customer_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function search(keyword: string){
+            try {
+                return await db.select().from(table.customer).where(ilike(table.customer.customer_name, `%${keyword}%`));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all, byId, search };
+    }
+
+    public static async create(customer_name: string, customer_address: string, phone_number: string) {
+        try {
+            return await db.insert(table.customer).values({
+                customer_name,
+                customer_address,
+                phone_number
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public static async update(customer_id: number, customer_name: string, customer_address: string, phone_number: string) {
+        try {
+            return await db.update(table.customer).set({
+                customer_name,
+                customer_address,
+                phone_number
+            }).where(eq(table.customer.customer_id, customer_id));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public static async delete(customer_id: number) {
+        try {
+            return await db.delete(table.customer).where(eq(table.customer.customer_id, customer_id));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}

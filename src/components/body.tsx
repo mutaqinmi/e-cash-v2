@@ -9,6 +9,9 @@ import DeleteEmployee from "./delete-employee";
 import AddProduct from "./add-product";
 import EditProduct from "./edit-product";
 import DeleteProduct from "./delete-product";
+import AddCustomer from "./add-customer";
+import EditCustomer from "./edit-customer";
+import DeleteCustomer from "./delete-customer";
 
 export default function Body(props: {
     className?: string;
@@ -34,6 +37,13 @@ export default function Body(props: {
     editedProductData?: table.productType | null;
     showDeleteProductDialog?: boolean | null;
     setShowDeleteProductDialog?: (show: boolean | null) => void;
+    showAddCustomerDialog?: boolean | null;
+    setShowAddCustomerDialog?: (show: boolean | null) => void;
+    showEditCustomerDialog?: boolean | null;
+    setShowEditCustomerDialog?: (show: boolean | null) => void;
+    editedCustomerData?: table.customerType | null;
+    showDeleteCustomerDialog?: boolean | null;
+    setShowDeleteCustomerDialog?: (show: boolean | null) => void;
 }){
     useEffect(() => {
         if (props.errorSnackBarMessage != null && props.successSnackBarMessage) {
@@ -55,6 +65,9 @@ export default function Body(props: {
             {props.showAddProductDialog ? <AddProduct popupController={props.setShowAddProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} /> : null}
             {props.showEditProductDialog ? <EditProduct popupController={props.setShowEditProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedProductData!} /> : null}
             {props.showDeleteProductDialog ? <DeleteProduct popupController={props.setShowDeleteProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedProductData!} /> : null}
+            {props.showAddCustomerDialog ? <AddCustomer popupController={props.setShowAddCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} /> : null}
+            {props.showEditCustomerDialog ? <EditCustomer popupController={props.setShowEditCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
+            {props.showDeleteCustomerDialog ? <DeleteCustomer popupController={props.setShowDeleteCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
         </div>
     )
 }

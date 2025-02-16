@@ -1,11 +1,11 @@
-import { Product } from "@/src/db/query";
+import { Customer } from "@/src/db/query";
 import { NextRequest, NextResponse } from "next/server";
 
 interface RequestBody {
-    product_id: number;
-    product_name: string;
-    price: number;
-    stock: number;
+    customer_id: number,
+    customer_name: string,
+    customer_address: string,
+    phone_number: string,
 }
 
 export async function GET(req: NextRequest){
@@ -13,14 +13,14 @@ export async function GET(req: NextRequest){
 
     try {
         if(search_query !== null){
-            const data = await Product.get.search(search_query);
+            const data = await Customer.get.search(search_query);
 
             return NextResponse.json(data, {
                 status: 200
             });
         }
 
-        const data = await Product.get.all();
+        const data = await Customer.get.all();
 
         return NextResponse.json(data, {
             status: 200
@@ -39,14 +39,14 @@ export async function POST(req: NextRequest){
     const body: RequestBody = await req.json();
 
     try {
-        // unstring price
-        body.price = parseInt(body.price.toString().split(".").join(""));
+        // format phone number
+        body.phone_number = body.phone_number.replace("+62 ", "0");
 
-        // insert new product
-        await Product.create(body.product_name, body.price, body.stock);
+        // insert new customer
+        await Customer.create(body.customer_name, body.customer_address, body.phone_number);
 
         return NextResponse.json({
-            message: "Barang berhasil ditambahkan"
+            message: "Pelanggan berhasil ditambahkan"
         }, {
             status: 201
         });
@@ -64,14 +64,14 @@ export async function PATCH(req: NextRequest){
     const body: RequestBody = await req.json();
 
     try {
-        // unstring price
-        body.price = parseInt(body.price.toString().split(".").join(""));
+        // format phone number
+        body.phone_number = body.phone_number.replace("+62 ", "0").replace(" ", "").replace("-", "");
 
-        // update product
-        Product.update(body.product_id, body.product_name, body.price, body.stock);
+        // update customer
+        await Customer.update(body.customer_id, body.customer_name, body.customer_address, body.phone_number);
 
         return NextResponse.json({
-            message: "Barang berhasil diedit"
+            message: "Pelanggan berhasil diedit"
         }, {
             status: 200
         });
@@ -86,21 +86,22 @@ export async function PATCH(req: NextRequest){
 }
 
 export async function DELETE(req: NextRequest){
-    const product_id = req.nextUrl.searchParams.get("product_id");
+    const customer_id = req.nextUrl.searchParams.get("customer_id");
 
     try {
-        if(product_id === null){
+        if(customer_id === null){
             return NextResponse.json({
-                message: "ID barang invalid"
+                message: "ID pelanggan invalid"
             }, {
                 status: 400
             });
         }
 
-        await Product.delete(parseInt(product_id));
+        // delete employee
+        await Customer.delete(parseInt(customer_id));
 
         return NextResponse.json({
-            message: "Barang berhasil dihapus"
+            message: "Pelanggan berhasil dihapus"
         }, {
             status: 200
         });
