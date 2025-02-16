@@ -19,7 +19,7 @@ export async function middleware(req: NextRequest){
     if (token && req.nextUrl.pathname === ("/signin")){
         if (authenticatedUser.data.data.role === "Administrator"){
             return NextResponse.rewrite(new URL('/admin', req.url));
-        } else {
+        } else if(authenticatedUser.data.data.role === "Kasir") {
             return NextResponse.rewrite(new URL('/cashier', req.url));
         }
     } else if (token && req.nextUrl.pathname === ("/admin") && authenticatedUser.data.data.role !== "Administrator"){

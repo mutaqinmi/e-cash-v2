@@ -24,8 +24,6 @@ interface ComponentState {
     setEditedEmployeeData: (data: table.employeeType | null) => void;
     showDeleteEmployeeDialog: boolean | null;
     setShowDeleteEmployeeDialog: (show: boolean | null) => void;
-    searchQuery: string;
-    setSearchQuery: (query: string) => void;
 }
 
 interface EmployeeData {
@@ -48,8 +46,6 @@ const useComponent = create<ComponentState>((set) => ({
     setEditedEmployeeData: (data: table.employeeType | null) => set(() => ({editedEmployeeData: data})),
     showDeleteEmployeeDialog: false,
     setShowDeleteEmployeeDialog: (show: boolean | null) => set(() => ({showDeleteEmployeeDialog: show})),
-    searchQuery: "",
-    setSearchQuery: (query: string) => set(() => ({searchQuery: query}))
 }));
 
 const useEmployeeData = create<EmployeeData>((set) => ({
@@ -73,12 +69,10 @@ export default function Employee(){
         setEditedEmployeeData,
         showDeleteEmployeeDialog,
         setShowDeleteEmployeeDialog,
-        searchQuery,
-        setSearchQuery
     } = useComponent();
     const {data, setData} = useEmployeeData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
-
+    
     const getAllEmployees = useCallback(async () => {
         return await axios.get(`${process.env.API_URL}/employee`).then((response) => {
             if(response.status === 200){
@@ -111,13 +105,14 @@ export default function Employee(){
 
     const loadData = useCallback(async () => {
         setIsLoading(true);
-
+        
         await getAllEmployees();
     }, [getAllEmployees]);
 
     useEffect(() => {
         loadData();
     }, [loadData]);
+
 
     return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddEmployeeDialog={showAddEmployeeDialog} setShowAddEmployeeDialog={setShowAddEmployeeDialog} onDataChanged={loadData} showEditEmployeeDialog={showEditEmployeeDialog} setShowEditEmployeeDialog={setShowEditEmployeeDialog} showEditEmployeePasswordDialog={showEditEmployeePasswordDialog} setShowEditEmployeePasswordDialog={setShowEditEmployeePasswordDialog} editedEmployeeData={editedEmployeeData} showDeleteEmployeeDialog={showDeleteEmployeeDialog} setShowDeleteEmployeeDialog={setShowDeleteEmployeeDialog}>
         <div className="grid grid-cols-3 gap-4">
@@ -130,19 +125,19 @@ export default function Employee(){
                     <table className="w-full border-spacing-1 border-separate">
                         <thead>
                             <tr>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.full_name!.localeCompare(b.full_name!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Nama</span>
                                         <CaretUpDown className="text-gray-500"/>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.user_name!.localeCompare(b.user_name!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Username</span>
                                         <CaretUpDown className="text-gray-500"/>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.role!.localeCompare(b.role!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Hak Akses</span>
                                         <CaretUpDown className="text-gray-500"/>

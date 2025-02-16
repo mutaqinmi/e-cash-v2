@@ -41,7 +41,7 @@ export default function Page() {
                 localStorage.setItem('session_user_name', response.data.data.name);
                 localStorage.setItem('session_user_role', response.data.data.role);
 
-                response.data.data.role === "administrator" ? router.push("/admin") : router.push("/cashier");
+                response.data.data.role === "Administrator" ? router.push("/admin") : router.push("/cashier");
             }
         }).catch((error: AxiosError) => {
             const { message } = error.response?.data as { message: string };

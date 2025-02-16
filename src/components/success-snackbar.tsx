@@ -11,7 +11,7 @@ export default function SuccessSnackbar(props: {message: string; snackbarControl
     }, [props.message, props.snackbarController]);
 
     return (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-green-500 text-white p-4 rounded-md flex items-center gap-4 z-[60]">
+        <div className="absolute bottom-4 right-4 bg-green-500 text-white p-4 rounded-md flex items-center gap-4 z-[60]">
             {props.message}
             <X onClick={() => {props.snackbarController!(null);}} className="text-white"/>
         </div>

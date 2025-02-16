@@ -3,14 +3,6 @@ import { db } from "./index";
 import * as table from "./schema";
 
 export class Employee {
-    constructor(
-        public employee_id: number,
-        public full_name: string,
-        public user_name: string,
-        public password: string,
-        public role: string
-    ) {}
-
     public static get get() {
         async function all() {
             try {
@@ -89,6 +81,68 @@ export class Employee {
     public static async delete(employee_id: number) {
         try {
             return await db.delete(table.employee).where(eq(table.employee.employee_id, employee_id));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+}
+
+export class Product {
+    public static get get(){
+        async function all() {
+            try {
+                return await db.select().from(table.product);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function byId(product_id: number) {
+            try {
+                return await db.select().from(table.product).where(eq(table.product.product_id, product_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function search(keyword: string){
+            try {
+                return await db.select().from(table.product).where(ilike(table.product.product_name, `%${keyword}%`));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all, byId, search };
+    }
+
+    public static async create(product_name: string, price: number, stock: number) {
+        try {
+            return await db.insert(table.product).values({
+                product_name,
+                price,
+                stock
+            });
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public static async update(product_id: number, product_name: string, price: number, stock: number) {
+        try {
+            return await db.update(table.product).set({
+                product_name,
+                price,
+                stock
+            }).where(eq(table.product.product_id, product_id));
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    public static async delete(product_id: number) {
+        try {
+            return await db.delete(table.product).where(eq(table.product.product_id, product_id));
         } catch (error) {
             console.error(error);
         }
