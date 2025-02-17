@@ -10,10 +10,21 @@ interface RequestBody {
 
 export async function GET(req: NextRequest){
     const search_query = req.nextUrl.searchParams.get("search");
+    const phone_number = req.nextUrl.searchParams.get("phone_number");
 
     try {
-        if(search_query !== null){
+        if(search_query){
             const data = await Customer.get.search(search_query);
+
+            return NextResponse.json(data, {
+                status: 200
+            });
+        }
+
+        if(phone_number){
+            // format phone number
+            const formatted_phone_number = phone_number.replace("62 ", "0").replace(" ", "").replace("-", "");
+            const data = await Customer.get.byPhoneNumber(formatted_phone_number);
 
             return NextResponse.json(data, {
                 status: 200

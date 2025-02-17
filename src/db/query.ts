@@ -2,6 +2,15 @@ import { eq, ilike, or } from "drizzle-orm";
 import { db } from "./index";
 import * as table from "./schema";
 
+interface ProductItem {
+    product_id: number;
+    product_name: string;
+    price: number;
+    stock: number;
+    quantity: number;
+    subtotal: number;
+} 
+
 export class Employee {
     public static get get() {
         async function all() {
@@ -128,16 +137,30 @@ export class Product {
         }
     }
 
-    public static async update(product_id: number, product_name: string, price: number, stock: number) {
-        try {
-            return await db.update(table.product).set({
-                product_name,
-                price,
-                stock
-            }).where(eq(table.product.product_id, product_id));
-        } catch (error) {
-            console.error(error);
+    public static get update() {
+        async function data(product_id: number, product_name: string, price: number, stock: number){
+            try {
+                return await db.update(table.product).set({
+                    product_name,
+                    price,
+                    stock
+                }).where(eq(table.product.product_id, product_id));
+            } catch (error) {
+                console.error(error);
+            }
         }
+
+        async function stock(product_id: number, stock: number){
+            try {
+                return await db.update(table.product).set({
+                    stock
+                }).where(eq(table.product.product_id, product_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { data, stock };
     }
 
     public static async delete(product_id: number) {
@@ -167,6 +190,14 @@ export class Customer {
             }
         }
 
+        async function byPhoneNumber(phone_number: string){
+            try {
+                return await db.select().from(table.customer).where(eq(table.customer.phone_number, phone_number));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
         async function search(keyword: string){
             try {
                 return await db.select().from(table.customer).where(ilike(table.customer.customer_name, `%${keyword}%`));
@@ -175,7 +206,7 @@ export class Customer {
             }
         }
 
-        return { all, byId, search };
+        return { all, byId, byPhoneNumber, search };
     }
 
     public static async create(customer_name: string, customer_address: string, phone_number: string) {
@@ -208,5 +239,42 @@ export class Customer {
         } catch (error) {
             console.error(error);
         }
+    }
+}
+
+export class Transaction {
+    public static get create() {
+        async function newTransaction(total_price: number, customer_id: number, employee_id: number){
+            try {
+                return await db.insert(table.sale).values({
+                    total_price,
+                    customer_id,
+                    employee_id
+                }).returning({sale_id: table.sale.sale_id});
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function detailTransaction(sale_id: number, products: ProductItem[]){
+            try {
+                const data = products.map((product: ProductItem) => {
+                    Product.update.stock(product.product_id, product.stock - product.quantity);
+
+                    return {
+                        sale_id,
+                        product_id: product.product_id,
+                        quantity: product.quantity,
+                        subtotal: product.subtotal
+                    }
+                })
+
+                return await db.insert(table.saleDetail).values(data);
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { newTransaction, detailTransaction };
     }
 }

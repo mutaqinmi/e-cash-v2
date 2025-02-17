@@ -68,7 +68,7 @@ export async function PATCH(req: NextRequest){
         body.price = parseInt(body.price.toString().split(".").join(""));
 
         // update product
-        Product.update(body.product_id, body.product_name, body.price, body.stock);
+        Product.update.data(body.product_id, body.product_name, body.price, body.stock);
 
         return NextResponse.json({
             message: "Barang berhasil diedit"
