@@ -121,29 +121,29 @@ export default function Employee(){
                     <SearchField placeholder="Cari pegawai" onChange={searchHandler}/>
                     <IconButton icon={<UserPlus size={20}/>} label="Tambah Pegawai" onClick={() => setShowAddEmployeeDialog(true)} className="py-2 px-3"/>
                 </div>
-                <div className="mt-6">
-                    <table className="w-full border-spacing-1 border-separate">
+                {data.length ? <div className="mt-6">
+                    <table className="w-full">
                         <thead>
                             <tr>
-                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.full_name!.localeCompare(b.full_name!)))}>
+                                <th className="font-normal text-gray-400 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.full_name!.localeCompare(b.full_name!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Nama</span>
-                                        <CaretUpDown className="text-gray-500"/>
+                                        <CaretUpDown className="text-gray-400"/>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.user_name!.localeCompare(b.user_name!)))}>
+                                <th className="font-normal text-gray-400 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.user_name!.localeCompare(b.user_name!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Username</span>
-                                        <CaretUpDown className="text-gray-500"/>
+                                        <CaretUpDown className="text-gray-400"/>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.role!.localeCompare(b.role!)))}>
+                                <th className="font-normal text-gray-400 py-2 cursor-pointer" onClick={() => setData(data.sort((a, b) => a.role!.localeCompare(b.role!)))}>
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Hak Akses</span>
-                                        <CaretUpDown className="text-gray-500"/>
+                                        <CaretUpDown className="text-gray-400"/>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2"></th>
+                                <th className="font-normal text-gray-400 py-2"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -170,7 +170,7 @@ export default function Employee(){
                             })}
                         </tbody>
                     </table>
-                </div>
+                </div> : <div className="mt-6 text-center text-gray-500">Data pegawai belum ada.</div>}
             </div>
         </div>
     </Body>

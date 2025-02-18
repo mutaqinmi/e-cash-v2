@@ -3,7 +3,7 @@ import Body from "@/src/components/body";
 import { CaretRight, Minus, Plus, UserPlus } from "@phosphor-icons/react";
 import SearchField from "../components/search-field";
 import IconButton from "../components/icon-button";
-import { formatCurrency, formatInputtedCurrency } from "../lib/number-formatter";
+import { formatCurrency } from "../lib/number-formatter";
 import Form from "next/form";
 import Button from "../components/button";
 import { create } from "zustand";
@@ -13,7 +13,6 @@ import * as table from "@/src/db/schema";
 import HorizontalDivider from "../components/horizontal-divider";
 import LoadingSpin from "../components/loading-spin";
 import PhoneField from "../components/phone-field";
-import { useRouter } from "next/navigation";
 
 interface ProductItem {
     product_id: number;
@@ -33,6 +32,10 @@ interface Component {
     setDataCustomer: (value: table.customerType[]) => void;
     showAddCustomerDialog?: boolean | null;
     setShowAddCustomerDialog?: (value: boolean | null) => void;
+    showSuccessfullTransactionDialog: boolean | null;
+    setShowSuccessfullTransactionDialog: (value: boolean | null) => void;
+    transactionData: table.saleType | null;
+    setTransactionData: (value: table.saleType | null) => void;
 }
 
 interface ProductData {
@@ -53,6 +56,10 @@ const useComponent =  create<Component>((set) => ({
     setDataCustomer: (value: table.customerType[]) => set(() => ({dataCustomer: value})),
     showAddCustomerDialog: false,
     setShowAddCustomerDialog: (value: boolean | null) => set(() => ({showAddCustomerDialog: value})),
+    showSuccessfullTransactionDialog: false,
+    setShowSuccessfullTransactionDialog: (value: boolean | null) => set(() => ({showSuccessfullTransactionDialog: value})),
+    transactionData: null,
+    setTransactionData: (value: table.saleType | null) => set(() => ({transactionData: value})),
 }));
 
 const useProductData = create<ProductData>((set) => ({
@@ -73,7 +80,11 @@ export default function Cashier(){
         dataCustomer,
         setDataCustomer,
         showAddCustomerDialog,
-        setShowAddCustomerDialog
+        setShowAddCustomerDialog,
+        showSuccessfullTransactionDialog,
+        setShowSuccessfullTransactionDialog,
+        transactionData,
+        setTransactionData
     } = useComponent();
     const {
         data,
@@ -84,7 +95,6 @@ export default function Cashier(){
         setTotal
     } = useProductData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
-    const router = useRouter();
 
     const searchProduct = useCallback(async (searchQuery: string) => {
         return await axios.get(`${process.env.API_URL}/product?search=${searchQuery}`).then((response) => {
@@ -196,13 +206,16 @@ export default function Cashier(){
     }, []);
 
     const newTransactionHandler = useCallback(async (cart: ProductItem[], total: number, customer_id: number) => {
+        if(customer_id === 0) return setErrorSnackBarMessage("Pelanggan tidak ditemukan");
         return await axios.post(`${process.env.API_URL}/transaction`, {
             cart,
             total,
             customer_id
         }).then((response) => {
             if(response.status === 200){
-                setSuccessSnackBarMessage(response.data.message);
+                const data: table.saleType = response.data.data;
+                setTransactionData(data);
+                setShowSuccessfullTransactionDialog(true);
             }
         }).catch((error) => {
             const { message } = error.response?.data as { message: string };
@@ -212,7 +225,6 @@ export default function Cashier(){
             localStorage.setItem("cart", JSON.stringify([]));
             setCart([]);
             setTotal(0);
-            router.refresh();
         });
     }, [])
     const getMemberDataHandler = (formData: FormData) => getMemberData(formData);
@@ -227,7 +239,7 @@ export default function Cashier(){
         getTotalPayment(cart);
     }, []);
 
-    return <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddCustomerDialog={showAddCustomerDialog} setShowAddCustomerDialog={setShowAddCustomerDialog}>
+    return <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddCustomerDialog={showAddCustomerDialog} setShowAddCustomerDialog={setShowAddCustomerDialog} showSuccessfullTransactionDialog={showSuccessfullTransactionDialog} setShowSuccessfullTransactionDialog={setShowSuccessfullTransactionDialog} transactionData={transactionData}>
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2 max-h-fit bg-white p-4 rounded-lg">
                 <div className="flex flex-col gap-4 relative">
@@ -263,31 +275,31 @@ export default function Cashier(){
                         })}
                     </div> : null}
                 </div>
-                <div className="mt-6">
-                    <table className="w-full border-spacing-1 border-separate">
+                {cart.length ? <div className="mt-6">
+                    <table className="w-full">
                         <thead>
                             <tr>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal text-gray-400 py-2">
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Nama Produk</span>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal text-gray-400 py-2">
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Harga</span>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal text-gray-400 py-2">
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Jumlah</span>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2">
+                                <th className="font-normal text-gray-400 py-2">
                                     <div className="flex justify-center items-center gap-2">
                                         <span>Total</span>
                                     </div>
                                 </th>
-                                <th className="font-normal bg-gray-100 py-2"></th>
+                                <th className="font-normal py-2"></th>
                             </tr>
                         </thead>
                         <tbody>
@@ -308,7 +320,7 @@ export default function Cashier(){
                             })}
                         </tbody>
                     </table>
-                </div>
+                </div> : null}
             </div>
             <div className="col-span-1 max-h-fit flex flex-col gap-4">
                 <div className="text-center bg-white p-4 rounded-lg">
@@ -345,7 +357,7 @@ export default function Cashier(){
                     </Form>
                     <HorizontalDivider className="border-gray-100 my-4"/>
                     <Form action={() => {
-                        newTransactionHandler(cart, total, dataCustomer[0].customer_id);
+                        newTransactionHandler(cart, total, dataCustomer[0]?.customer_id ?? 0);
                     }} formMethod="POST" className="mt-2">
                         <Button className="w-full" label="Bayar" formButton/>
                     </Form>

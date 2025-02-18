@@ -25,6 +25,25 @@ interface Payload extends JwtPayload {
     role: string;
 }
 
+export async function GET(req: NextRequest){
+    try {
+        const transaction = await Transaction.get.all();
+
+        return NextResponse.json({
+            data: transaction
+        }, {
+            status: 200
+        });
+    } catch (error) {
+        return NextResponse.json({
+            message: "an error occured, see console for more details",
+            error: error
+        }, {
+            status: 500
+        });
+    }
+}
+
 export async function POST(req: NextRequest){
     const body: RequestBody = await req.json();
     const token = req.cookies.get("token")?.value;
@@ -55,11 +74,11 @@ export async function POST(req: NextRequest){
 
         return NextResponse.json({
             message: "Transaksi berhasil",
+            data: transaction[0]
         }, {
             status: 200,
         })
     } catch (error) {
-        console.log(error);
         return NextResponse.json({
             message: "an error occured, see console for more details",
             error: error

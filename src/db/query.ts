@@ -243,6 +243,18 @@ export class Customer {
 }
 
 export class Transaction {
+    public static get get(){
+        async function all(){
+            try {
+                return await db.select().from(table.sale).leftJoin(table.employee, eq(table.sale.employee_id, table.employee.employee_id)).leftJoin(table.customer, eq(table.sale.customer_id, table.customer.customer_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all };
+    }
+
     public static get create() {
         async function newTransaction(total_price: number, customer_id: number, employee_id: number){
             try {
@@ -250,7 +262,7 @@ export class Transaction {
                     total_price,
                     customer_id,
                     employee_id
-                }).returning({sale_id: table.sale.sale_id});
+                }).returning();
             } catch (error) {
                 console.error(error);
             }

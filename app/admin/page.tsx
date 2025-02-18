@@ -4,26 +4,40 @@ import SidebarMenuItem from "@/src/components/sidebar-menu-item";
 import TopBar from "@/src/components/top-bar";
 import Customer from "@/src/templates/customer";
 import Employee from "@/src/templates/employee";
+import Overview from "@/src/templates/overview";
 import Product from "@/src/templates/product";
-import { Package, User, Users } from "@phosphor-icons/react";
+import { ChartPieSlice, Package, User, Users } from "@phosphor-icons/react";
 import { useState } from "react";
+import { create } from "zustand";
+
+interface Sidebar {
+    sidebar: string;
+    setSidebar: (sidebar: string) => void;
+}
+
+const useSidebar = create<Sidebar>((set) => ({
+    sidebar: "overview",
+    setSidebar: (sidebar) => set({sidebar}),
+}));
 
 export default function Page(){
-    const [sidebarIndex, setSidebarIndex] = useState(1);
+    const {sidebar, setSidebar} = useSidebar();
     const pages = () => {
-        switch(sidebarIndex){
-            case 1: return <Employee/>
-            case 2: return <Product/>
-            case 3: return <Customer/>
+        switch(sidebar){
+            case "overview": return <Overview setSidebar={setSidebar}/>
+            case "employee": return <Employee/>
+            case "product": return <Product/>
+            case "customer": return <Customer/>
         }
     }
 
     return <>
         <TopBar/>
         <Sidebar>
-            <SidebarMenuItem icon={<User/>} title="Pegawai" onClick={() => setSidebarIndex(1)} active={sidebarIndex === 1 ? true : false}/>
-            <SidebarMenuItem icon={<Package/>} title="Barang" onClick={() => setSidebarIndex(2)} active={sidebarIndex === 2 ? true : false}/>
-            <SidebarMenuItem icon={<Users/>} title="Pelanggan" onClick={() => setSidebarIndex(3)} active={sidebarIndex === 3 ? true : false}/>
+            <SidebarMenuItem icon={<ChartPieSlice/>} title="Ringkasan" onClick={() => setSidebar("overview")} active={sidebar === "overview" ? true : false}/>
+            <SidebarMenuItem icon={<User/>} title="Pegawai" onClick={() => setSidebar("employee")} active={sidebar === "employee" ? true : false}/>
+            <SidebarMenuItem icon={<Package/>} title="Barang" onClick={() => setSidebar("product")} active={sidebar === "product" ? true : false}/>
+            <SidebarMenuItem icon={<Users/>} title="Pelanggan" onClick={() => setSidebar("customer")} active={sidebar === "customer" ? true : false}/>
         </Sidebar>
         {pages()}
     </>

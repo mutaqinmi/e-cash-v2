@@ -37,15 +37,15 @@ export const sale = pgTable('sale', {
     sale_id: serial('sale_id').primaryKey(),
     sale_date: date('sale_date').default('NOW()'),
     total_price: integer('total_price'),
-    customer_id: integer('customer_id').references(() => customer.customer_id),
-    employee_id: integer('employee_id').references(() => employee.employee_id),
+    customer_id: integer('customer_id').references(() => customer.customer_id, { onDelete: "cascade", onUpdate: "cascade" }),
+    employee_id: integer('employee_id').references(() => employee.employee_id, { onDelete: "cascade", onUpdate: "cascade" }),
 });
 export type saleType = typeof sale.$inferSelect;
 
 export const saleDetail = pgTable('saleDetail', {
     detail_id: serial('detail_id').primaryKey(),
-    sale_id: integer('sale_id').references(() => sale.sale_id),
-    product_id: integer('product_id').references(() => product.product_id),
+    sale_id: integer('sale_id').references(() => sale.sale_id, { onDelete: "cascade", onUpdate: "cascade" }),
+    product_id: integer('product_id').references(() => product.product_id, { onDelete: "cascade", onUpdate: "cascade" }),
     quantity: integer('quantity'),
     subtotal: integer('subtotal'),
 });
