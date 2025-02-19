@@ -95,6 +95,7 @@ export default function Cashier(){
         setTotal
     } = useProductData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isMemberLoading, setIsMemberLoading] = useState<boolean>(false);
 
     const searchProduct = useCallback(async (searchQuery: string) => {
         return await axios.get(`${process.env.API_URL}/product?search=${searchQuery}`).then((response) => {
@@ -145,7 +146,8 @@ export default function Cashier(){
 
         localStorage.setItem("cart", JSON.stringify(cart));
         setCart(cart);
-        setTotal(0);
+        getTotalPayment(cart);
+        setDataCustomer([]);
     }
 
     const increaseProductQuantityHandler = (index: number) => {
@@ -202,7 +204,7 @@ export default function Cashier(){
         }).catch((error) => {
             const { message } = error.response?.data as { message: string };
             setErrorSnackBarMessage(message);
-        });
+        }).finally(() => setIsMemberLoading(false));
     }, []);
 
     const newTransactionHandler = useCallback(async (cart: ProductItem[], total: number, customer_id: number) => {
@@ -225,9 +227,15 @@ export default function Cashier(){
             localStorage.setItem("cart", JSON.stringify([]));
             setCart([]);
             setTotal(0);
+            setDataCustomer([]);
         });
     }, [])
-    const getMemberDataHandler = (formData: FormData) => getMemberData(formData);
+
+    const getMemberDataHandler = useCallback(async (formData: FormData) => {
+        setIsMemberLoading(true);
+
+        await getMemberData(formData)
+    }, [getMemberData]);
 
     useEffect(() => {
         if(typeof window === "undefined") return;
@@ -327,7 +335,7 @@ export default function Cashier(){
                     <span>Total</span>
                     <h1 className="text-4xl font-semibold mt-2">{formatCurrency(total)}</h1>
                 </div>
-                <div className="bg-white p-4 rounded-lg">
+                {cart.length ? <div className="bg-white p-4 rounded-lg">
                     <Form action={getMemberDataHandler} formMethod="GET">
                         <div className="flex gap-2 justify-between items-center">
                             <div className="w-full relative">
@@ -336,7 +344,7 @@ export default function Cashier(){
                             </div>
                             <IconButton icon={<UserPlus size={24} weight="bold"/>} className="p-3" onClick={() => setShowAddCustomerDialog!(true)}/>
                         </div>
-                        {dataCustomer.length && cart.length ? <div>
+                        {isMemberLoading ? <div className="flex justify-center items-center"><LoadingSpin className="h-6 w-6 border-[3px]"/></div> : dataCustomer.length && cart.length ? <div>
                             {dataCustomer.map((customer: table.customerType, index: number) => {
                                 return <div key={index} className="flex flex-col gap-2">
                                     <div className="flex justify-between items-center">
@@ -356,12 +364,10 @@ export default function Cashier(){
                         </div> : null}
                     </Form>
                     <HorizontalDivider className="border-gray-100 my-4"/>
-                    <Form action={() => {
-                        newTransactionHandler(cart, total, dataCustomer[0]?.customer_id ?? 0);
-                    }} formMethod="POST" className="mt-2">
+                    <Form action={() => newTransactionHandler(cart, total, dataCustomer[0]?.customer_id ?? 0)} formMethod="POST" className="mt-2">
                         <Button className="w-full" label="Bayar" formButton/>
                     </Form>
-                </div>
+                </div> : null}
             </div>
         </div>
     </Body>

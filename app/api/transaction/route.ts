@@ -59,8 +59,9 @@ export async function POST(req: NextRequest){
 
         const payload: Payload = Token.verify(token) as Payload;
         const employee_id: number = payload.employee_id;
+        const currentTime = new Date().toISOString();
 
-        const transaction = await Transaction.create.newTransaction(body.total, body.customer_id, employee_id);
+        const transaction = await Transaction.create.newTransaction(currentTime, body.total, body.customer_id, employee_id);
 
         if(!transaction){
             return NextResponse.json({

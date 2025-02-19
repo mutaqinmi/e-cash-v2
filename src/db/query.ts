@@ -252,13 +252,22 @@ export class Transaction {
             }
         }
 
-        return { all };
+        async function saleDetail(sale_id: number){
+            try {
+                return await db.select().from(table.sale).leftJoin(table.saleDetail, eq(table.saleDetail.sale_id, table.sale.sale_id)).leftJoin(table.product, eq(table.saleDetail.product_id, table.product.product_id)).where(eq(table.saleDetail.sale_id, sale_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all, saleDetail };
     }
 
     public static get create() {
-        async function newTransaction(total_price: number, customer_id: number, employee_id: number){
+        async function newTransaction(sale_date: string, total_price: number, customer_id: number, employee_id: number){
             try {
                 return await db.insert(table.sale).values({
+                    sale_date,
                     total_price,
                     customer_id,
                     employee_id

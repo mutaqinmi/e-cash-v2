@@ -9,42 +9,20 @@ import { create } from "zustand";
 import Loading from "../components/loading";
 import * as table from "@/src/db/schema";
 
-const data = [
-  {
-    date: 'Page A',
-    Total: 4000,
-  },
-  {
-    date: 'Page B',
-    Total: 3000,
-  },
-  {
-    date: 'Page C',
-    Total: 2000,
-  },
-  {
-    date: 'Page D',
-    Total: 2780,
-  },
-  {
-    date: 'Page E',
-    Total: 1890,
-  },
-  {
-    date: 'Page F',
-    Total: 2390,
-  },
-  {
-    date: 'Page G',
-    Total: 3490,
-  },
-];
+interface Data {
+    date: string;
+    Total: number;
+}
 
 interface ComponentState {
     errorSnackBarMessage: string | null;
     setErrorSnackBarMessage: (message: string | null) => void;
     successSnackBarMessage: string | null;
     setSuccessSnackBarMessage: (message: string | null) => void;
+    showSaleDetailDialog: boolean | null;
+    setShowSaleDetailDialog: (show: boolean | null) => void;
+    saleDetailID: number | null;
+    setSaleDetailID: (id: number | null) => void;
 }
 
 interface OverviewData {
@@ -54,6 +32,8 @@ interface OverviewData {
     setProductData: (data: table.productType[]) => void;
     customerData: table.customerType[];
     setCustomerData: (data: table.customerType[]) => void;
+    chartData: Data[];
+    setChartData: (data: Data[]) => void;
 }
 
 const useComponent = create<ComponentState>((set) => ({
@@ -61,6 +41,10 @@ const useComponent = create<ComponentState>((set) => ({
     setErrorSnackBarMessage: (message: string | null) => set(() => ({errorSnackBarMessage: message})),
     successSnackBarMessage: null,
     setSuccessSnackBarMessage: (message: string | null) => set(() => ({successSnackBarMessage: message})),
+    showSaleDetailDialog: null,
+    setShowSaleDetailDialog: (show: boolean | null) => set(() => ({showSaleDetailDialog: show})),
+    saleDetailID: null,
+    setSaleDetailID: (id: number | null) => set(() => ({saleDetailID: id})),
 }));
 
 const useOverview = create<OverviewData>((set) => ({
@@ -70,6 +54,8 @@ const useOverview = create<OverviewData>((set) => ({
     setProductData: (data: table.productType[]) => set(() => ({productData: data})),
     customerData: [],
     setCustomerData: (data: table.customerType[]) => set(() => ({customerData: data})),
+    chartData: [],
+    setChartData: (data: Data[]) => set(() => ({chartData: data})),
 }));
 
 export default function Overview(props: {setSidebar: (sidebar: string) => void}){
@@ -78,6 +64,10 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
         setErrorSnackBarMessage,
         successSnackBarMessage,
         setSuccessSnackBarMessage,
+        showSaleDetailDialog,
+        setShowSaleDetailDialog,
+        saleDetailID,
+        setSaleDetailID
     } = useComponent();
     const {
         transactionData,
@@ -85,7 +75,9 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
         productData,
         setProductData,
         customerData,
-        setCustomerData
+        setCustomerData,
+        chartData,
+        setChartData,
     } = useOverview();
     const router = useRouter();
     const [isLoading, setIsLoading] = useState(false);
@@ -127,6 +119,18 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
         }).finally(() => setIsLoading(false));
     }, []);
 
+    const getTransactionStatistic = useCallback(async () => {
+        return await axios.get(`${process.env.API_URL}/transaction/stats`).then((response) => {
+            if(response.status === 200){
+                const data: Data[] = response.data.data;
+                setChartData(data);
+            }
+        }).catch((error) => {
+            const { message } = error.response?.data as { message: string };
+            setErrorSnackBarMessage(message);
+        }).finally(() => setIsLoading(false));
+    }, []);
+
     const setStockColor = (stock: number): string => {
         if(stock <= 20){
             return "text-red-500";
@@ -156,13 +160,14 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
         await getAllTransaction();
         await getAllProducts();
         await getAllCustomers();
-    }, [getAllTransaction, getAllProducts, getAllCustomers]);
+        await getTransactionStatistic();
+    }, [getAllTransaction, getAllProducts, getAllCustomers, getTransactionStatistic]);
 
     useEffect(() => {
         loadData();
     }, [loadData]);
 
-    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" successSnackBarMessage={successSnackBarMessage} errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage}>
+    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" successSnackBarMessage={successSnackBarMessage} errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showSaleDetailDialog={showSaleDetailDialog} setShowSaleDetailDialog={setShowSaleDetailDialog} saleDetailID={saleDetailID}>
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-1 bg-white p-4 rounded-md flex items-center justify-between gap-4 cursor-pointer" onClick={() => props.setSidebar("product")}>
                 <div className="flex items-center gap-4">
@@ -205,7 +210,7 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
             <div className="w-full h-fit col-span-3 bg-white py-4 px-8 rounded-md">
                 <h1 className="text-xl font-semibold block mb-8">Statistik Riwayat Penjualan</h1>
                 <div className="w-full h-64">
-                    <Chart data={data}/>
+                    <Chart data={chartData}/>
                 </div>
             </div>
             <div className="col-span-2 bg-white p-4 rounded-md">
@@ -274,7 +279,10 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
                 </thead>
                 <tbody>
                     {transactionData.map((transaction: {employee: table.employeeType, customer: table.customerType, sale: table.saleType}, index: number) => {
-                        return <tr key={index} className="text-center cursor-pointer hover:bg-gray-100" onClick={() => {}}>
+                        return <tr key={index} className="text-center cursor-pointer hover:bg-gray-100" onClick={() => {
+                            setSaleDetailID(transaction.sale.sale_id);
+                            setShowSaleDetailDialog(true);
+                        }}>
                             <td className="p-2">{transaction.sale.sale_date}</td>
                             <td className="p-2">{transaction.sale.sale_id}</td>
                             <td className="p-2">{formatCurrency(transaction.sale.total_price!)}</td>

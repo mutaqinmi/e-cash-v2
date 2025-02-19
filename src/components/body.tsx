@@ -13,6 +13,7 @@ import AddCustomer from "./add-customer";
 import EditCustomer from "./edit-customer";
 import DeleteCustomer from "./delete-customer";
 import TransactionFinished from "./transaction-finished";
+import DetailTransaction from "./detail-transaction";
 
 export default function Body(props: {
     className?: string;
@@ -48,6 +49,9 @@ export default function Body(props: {
     showSuccessfullTransactionDialog?: boolean | null;
     setShowSuccessfullTransactionDialog?: (show: boolean | null) => void;
     transactionData?: table.saleType | null;
+    showSaleDetailDialog?: boolean | null;
+    setShowSaleDetailDialog?: (show: boolean | null) => void;
+    saleDetailID?: number | null;
 }){
     useEffect(() => {
         if (props.errorSnackBarMessage != null && props.successSnackBarMessage) {
@@ -73,6 +77,7 @@ export default function Body(props: {
             {props.showEditCustomerDialog ? <EditCustomer popupController={props.setShowEditCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
             {props.showDeleteCustomerDialog ? <DeleteCustomer popupController={props.setShowDeleteCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
             {props.showSuccessfullTransactionDialog ? <TransactionFinished popupController={props.setShowSuccessfullTransactionDialog} data={props.transactionData!} /> : null}
+            {props.showSaleDetailDialog ? <DetailTransaction popupController={props.setShowSaleDetailDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} sale_id={props.saleDetailID!} /> : null}
         </div>
     )
 }

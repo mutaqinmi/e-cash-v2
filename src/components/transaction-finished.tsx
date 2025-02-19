@@ -22,7 +22,7 @@ export default function TransactionFinished(props: {popupController?: (show: boo
                 </div>
             </div>
             <div className="mt-4 flex justify-end items-center gap-2">
-                <Button className="py-2" label="Tutup" onClick={() => {props.popupController!(false); window.location.reload()}}></Button>
+                <Button className="py-2" label="Tutup" onClick={() => props.popupController!(false)}></Button>
             </div>
         </div>
     </div>
