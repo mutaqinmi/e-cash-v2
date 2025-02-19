@@ -6,6 +6,7 @@ export const employee = pgTable('employee', {
     user_name: varchar('user_name', {length: 50}),
     password: varchar('password', {length: 255}),
     role: varchar('role', {length: 50}),
+    status: boolean('status').default(true),
 }, (table) => [
     index("user_name_idx").on(table.user_name),
     index("name_idx").on(table.full_name)

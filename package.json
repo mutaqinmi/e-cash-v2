@@ -19,6 +19,8 @@
     "dotenv": "^16.4.7",
     "drizzle-orm": "^0.39.3",
     "jsonwebtoken": "^9.0.2",
+    "jspdf": "^3.0.0",
+    "jspdf-autotable": "^3.8.4",
     "next": "15.1.7",
     "next-auth": "^4.24.11",
     "pg": "^8.13.2",

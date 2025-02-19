@@ -1,6 +1,6 @@
 'use client'
 import Body from "@/src/components/body";
-import { CaretUpDown, Key, PencilSimple, TrashSimple, UserPlus } from "@phosphor-icons/react";
+import { Archive, ArchiveBox, CaretUpDown, Key, PencilSimple, Power, UserPlus } from "@phosphor-icons/react";
 import SearchField from "../components/search-field";
 import IconButton from "../components/icon-button";
 import { create } from "zustand";
@@ -24,6 +24,8 @@ interface ComponentState {
     setEditedEmployeeData: (data: table.employeeType | null) => void;
     showDeleteEmployeeDialog: boolean | null;
     setShowDeleteEmployeeDialog: (show: boolean | null) => void;
+    showInactiveEmployeeList: boolean | null;
+    setShowInactiveEmployeeList: (show: boolean | null) => void;
 }
 
 interface EmployeeData {
@@ -46,6 +48,8 @@ const useComponent = create<ComponentState>((set) => ({
     setEditedEmployeeData: (data: table.employeeType | null) => set(() => ({editedEmployeeData: data})),
     showDeleteEmployeeDialog: false,
     setShowDeleteEmployeeDialog: (show: boolean | null) => set(() => ({showDeleteEmployeeDialog: show})),
+    showInactiveEmployeeList: false,
+    setShowInactiveEmployeeList: (show: boolean | null) => set(() => ({showInactiveEmployeeList: show})),
 }));
 
 const useEmployeeData = create<EmployeeData>((set) => ({
@@ -69,6 +73,8 @@ export default function Employee(){
         setEditedEmployeeData,
         showDeleteEmployeeDialog,
         setShowDeleteEmployeeDialog,
+        showInactiveEmployeeList,
+        setShowInactiveEmployeeList
     } = useComponent();
     const {data, setData} = useEmployeeData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -114,12 +120,13 @@ export default function Employee(){
     }, [loadData]);
 
 
-    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddEmployeeDialog={showAddEmployeeDialog} setShowAddEmployeeDialog={setShowAddEmployeeDialog} onDataChanged={loadData} showEditEmployeeDialog={showEditEmployeeDialog} setShowEditEmployeeDialog={setShowEditEmployeeDialog} showEditEmployeePasswordDialog={showEditEmployeePasswordDialog} setShowEditEmployeePasswordDialog={setShowEditEmployeePasswordDialog} editedEmployeeData={editedEmployeeData} showDeleteEmployeeDialog={showDeleteEmployeeDialog} setShowDeleteEmployeeDialog={setShowDeleteEmployeeDialog}>
+    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddEmployeeDialog={showAddEmployeeDialog} setShowAddEmployeeDialog={setShowAddEmployeeDialog} onDataChanged={loadData} showEditEmployeeDialog={showEditEmployeeDialog} setShowEditEmployeeDialog={setShowEditEmployeeDialog} showEditEmployeePasswordDialog={showEditEmployeePasswordDialog} setShowEditEmployeePasswordDialog={setShowEditEmployeePasswordDialog} editedEmployeeData={editedEmployeeData} showDeleteEmployeeDialog={showDeleteEmployeeDialog} setShowDeleteEmployeeDialog={setShowDeleteEmployeeDialog} showInactiveEmployeeList={showInactiveEmployeeList} setShowInactiveEmployeeList={setShowInactiveEmployeeList}>
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-3 bg-white p-4 rounded-lg">
                 <div className="flex gap-4 items-center">
                     <SearchField placeholder="Cari pegawai" onChange={searchHandler}/>
                     <IconButton icon={<UserPlus size={20}/>} label="Tambah Pegawai" onClick={() => setShowAddEmployeeDialog(true)} className="py-2 px-3"/>
+                    <IconButton icon={<Archive size={24}/>} onClick={() => setShowInactiveEmployeeList(true)} className="py-2 px-3"/>
                 </div>
                 {data.length ? <div className="mt-6">
                     <table className="w-full">
@@ -161,10 +168,10 @@ export default function Employee(){
                                             setEditedEmployeeData(employee);
                                             setShowEditEmployeePasswordDialog(true);
                                         }} className="aspect-square p-1"/>
-                                        <IconButton icon={<TrashSimple size={16}/>} onClick={() => {
+                                        {window.localStorage.getItem("session_user_name") === employee.full_name ? null : <IconButton icon={<ArchiveBox size={16}/>} onClick={() => {
                                             setEditedEmployeeData(employee);
                                             setShowDeleteEmployeeDialog(true);
-                                        }} className="bg-red-500 hover:bg-red-700 aspect-square p-1"/>
+                                        }} className="bg-orange-500 hover:bg-orange-700 aspect-square p-1"/>}
                                     </td>
                                 </tr>
                             })}

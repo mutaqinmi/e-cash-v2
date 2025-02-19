@@ -15,7 +15,7 @@ export class Employee {
     public static get get() {
         async function all() {
             try {
-                return await db.select().from(table.employee);
+                return await db.select().from(table.employee).where(eq(table.employee.status, true));
             } catch (error) {
                 console.error(error);
             }
@@ -31,7 +31,7 @@ export class Employee {
 
         async function byUsername(user_name: string) {
             try {
-                return await db.select().from(table.employee).where(eq(table.employee.user_name, user_name));
+                return await db.select().from(table.employee).where(and(eq(table.employee.user_name, user_name), eq(table.employee.status, true)));
             } catch (error) {
                 console.error(error);
             }
@@ -39,13 +39,21 @@ export class Employee {
 
         async function search(keyword: string){
             try {
-                return await db.select().from(table.employee).where(or(ilike(table.employee.full_name, `%${keyword}%`), ilike(table.employee.user_name, `%${keyword}%`)));
+                return await db.select().from(table.employee).where(and(or(ilike(table.employee.full_name, `%${keyword}%`), ilike(table.employee.user_name, `%${keyword}%`)), eq(table.employee.status, true)));
             } catch (error) {
                 console.error(error);
             }
         }
 
-        return { all, byId, byUsername, search };
+        async function inactive(){
+            try {
+                return await db.select().from(table.employee).where(eq(table.employee.status, false));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all, byId, byUsername, search, inactive };
     }
 
     public static async create(full_name: string, user_name: string, password: string, role: string) {
@@ -84,7 +92,17 @@ export class Employee {
             }
         }
 
-        return { data, password };
+        async function status(employee_id: number, active: boolean) {
+            try {
+                return await db.update(table.employee).set({
+                    status: active
+                }).where(eq(table.employee.employee_id, employee_id));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { data, password, status };
     }
 
     public static async delete(employee_id: number) {

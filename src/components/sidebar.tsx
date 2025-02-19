@@ -46,7 +46,7 @@ export default function Sidebar(props: {children: React.ReactNode}){
         </div> : null}
         <div>
             <div className="m-4 p-4 flex justify-center items-center gap-2 bg-blue-100 rounded-lg">
-                <Image width={0} height={0} src={"/logo.png"} unoptimized alt="Logo" className="w-10"/>
+                <Image width={0} height={0} src={"/meta/logo.png"} unoptimized alt="Logo" className="w-10"/>
                 <div className="flex flex-col justify-center">
                     <h1 className="font-semibold text-lg tracking-widest leading-5">E - Cash</h1>
                     <span className="text-xs tracking-wide leading-5">{role.charAt(0).toUpperCase() + role.slice(1)}</span>

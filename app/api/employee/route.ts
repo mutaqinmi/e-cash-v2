@@ -12,6 +12,7 @@ interface RequestBody {
 
 export async function GET(req: NextRequest){
     const search_query = req.nextUrl.searchParams.get("search");
+    const status = req.nextUrl.searchParams.get("status");
 
     try {
         // search employee
@@ -21,6 +22,16 @@ export async function GET(req: NextRequest){
             return NextResponse.json(data, {
                 status: 200
             });
+        }
+
+        if(status){
+            if(status === "false"){
+                const data = await Employee.get.inactive();
+
+                return NextResponse.json(data, {
+                    status: 200
+                });
+            }
         }
 
         const data = await Employee.get.all();
@@ -70,8 +81,30 @@ export async function POST(req: NextRequest){
 
 export async function PATCH(req: NextRequest){
     const body: RequestBody = await req.json();
+    const employee_id: number = req.nextUrl.searchParams.get("employee_id") as unknown as number;
+    const status = req.nextUrl.searchParams.get("status");
 
     try {
+        if(status){
+            if(status === "true"){
+                await Employee.update.status(employee_id, true);
+
+                return NextResponse.json({
+                    message: "Pegawai berhasil diaktifkan"
+                }, {
+                    status: 200
+                });
+            } else if(status === "false"){
+                await Employee.update.status(employee_id, false);
+
+                return NextResponse.json({
+                    message: "Pegawai dinonaktifkan"
+                }, {
+                    status: 200
+                });
+            }
+        }
+
         // update employee
         if(!body.password){
             await Employee.update.data(body.employee_id, body.full_name, body.user_name, body.role);
