@@ -86,6 +86,7 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
         return await axios.get(`${process.env.API_URL}/transaction`).then((response) => {
             if(response.status === 200){
                 const data: {employee: table.employeeType, customer: table.customerType, sale: table.saleType}[] = response.data.data;
+                data.sort((a, b) => b.sale.sale_id! - a.sale.sale_id!);
                 setTransactionData(data);
             }
         }).catch((error) => {
@@ -244,35 +245,20 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
             <table className="w-full">
                 <thead>
                     <tr>
-                        <th className="font-normal text-gray-400 py-2 cursor-pointer">
-                            <div className="flex justify-center items-center gap-2">
-                                <span>Tanggal</span>
-                                <CaretUpDown className="text-gray-400"/>
-                            </div>
+                        <th className="font-normal text-gray-400 py-2">
+                            <span>Tanggal</span>
                         </th>
-                        <th className="font-normal text-gray-400 py-2 cursor-pointer">
-                            <div className="flex justify-center items-center gap-2">
-                                <span>ID Transaksi</span>
-                                <CaretUpDown className="text-gray-400"/>
-                            </div>
+                        <th className="font-normal text-gray-400 py-2">
+                            <span>ID Transaksi</span>
                         </th>
-                        <th className="font-normal text-gray-400 py-2 cursor-pointer">
-                            <div className="flex justify-center items-center gap-2">
-                                <span>Total Pembelian</span>
-                                <CaretUpDown className="text-gray-400"/>
-                            </div>
+                        <th className="font-normal text-gray-400 py-2">
+                            <span>Total Pembelian</span>
                         </th>
-                        <th className="font-normal text-gray-400 py-2 cursor-pointer">
-                            <div className="flex justify-center items-center gap-2">
-                                <span>Pelanggan</span>
-                                <CaretUpDown className="text-gray-400"/>
-                            </div>
+                        <th className="font-normal text-gray-400 py-2">
+                            <span>Pelanggan</span>
                         </th>
-                        <th className="font-normal text-gray-400 py-2 cursor-pointer">
-                            <div className="flex justify-center items-center gap-2">
-                                <span>Kasir</span>
-                                <CaretUpDown className="text-gray-400"/>
-                            </div>
+                        <th className="font-normal text-gray-400 py-2">
+                            <span>Kasir</span>
                         </th>
                         <th className="font-normal py-2"></th>
                     </tr>
@@ -286,7 +272,7 @@ export default function Overview(props: {setSidebar: (sidebar: string) => void})
                             <td className="p-2">{transaction.sale.sale_date}</td>
                             <td className="p-2">{transaction.sale.sale_id}</td>
                             <td className="p-2">{formatCurrency(transaction.sale.total_price!)}</td>
-                            <td className="p-2">{transaction.customer.customer_name}</td>
+                            <td className="p-2">{transaction.customer?.customer_name ?? "-"}</td>
                             <td className="p-2">{transaction.employee.full_name}</td>
                             <td><ArrowUpRight size={16}/></td>
                         </tr>

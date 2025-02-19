@@ -1,4 +1,4 @@
-import { date, decimal, index, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
+import { boolean, date, decimal, index, integer, pgTable, serial, text, varchar } from "drizzle-orm/pg-core";
 
 export const employee = pgTable('employee', {
     employee_id: serial('employee_id').primaryKey(),
@@ -28,6 +28,7 @@ export const product = pgTable('product', {
     product_name: varchar('product_name', {length: 255}),
     price: integer('price'),
     stock: integer('stock'),
+    active: boolean('active').default(true),
 }, (table) => [
     index("product_name_idx").on(table.product_name)
 ]);
@@ -37,7 +38,7 @@ export const sale = pgTable('sale', {
     sale_id: serial('sale_id').primaryKey(),
     sale_date: date('sale_date').default('NOW()'),
     total_price: integer('total_price'),
-    customer_id: integer('customer_id').references(() => customer.customer_id, { onDelete: "cascade", onUpdate: "cascade" }),
+    customer_id: integer('customer_id').references(() => customer.customer_id, { onDelete: "set null", onUpdate: "cascade" }),
     employee_id: integer('employee_id').references(() => employee.employee_id, { onDelete: "cascade", onUpdate: "cascade" }),
 });
 export type saleType = typeof sale.$inferSelect;

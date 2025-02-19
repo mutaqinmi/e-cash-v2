@@ -1,6 +1,5 @@
 import { X } from "@phosphor-icons/react";
 import Form from "next/form";
-import InputField from "./input-field";
 import Button from "./button";
 import { useCallback } from "react";
 import axios from "axios";
@@ -13,7 +12,6 @@ export default function EditProduct(props: {popupController?: (show: boolean | n
     const updateProduct = useCallback(async (product_id: number, formData: FormData) => {
         return await axios.patch(`${process.env.API_URL}/product`, {
             product_id,
-            product_name: formData.get("nama barang"),
             price: formData.get("harga barang"),
             stock: formData.get("stok barang")
         }, {
@@ -39,12 +37,11 @@ export default function EditProduct(props: {popupController?: (show: boolean | n
                 <X/>
             </div>
             <div>
-                <h1 className="text-2xl font-semibold">Edit Barang</h1>
-                <span className="text-sm">Edit data barang.</span>
+                <h1 className="text-2xl font-semibold">Edit {props.data.product_name}</h1>
+                <span className="text-sm">Edit data {props.data.product_name}.</span>
             </div>
             <div className="mt-8">
                 <Form action={updateProductHandler} formMethod="POST">
-                    <InputField label="Nama Barang" defaultValue={props.data.product_name}/>
                     <PriceField label="Harga Barang" defaultValue={formatInputtedCurrency(props.data.price?.toString()!)}/>
                     <NumberField label="Stok Barang" defaultValue={props.data.stock?.toString()}/>
                     <Button className="w-full mt-8" label="Edit Barang" formButton></Button>

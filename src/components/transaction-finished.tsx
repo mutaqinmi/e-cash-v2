@@ -17,6 +17,14 @@ export default function TransactionFinished(props: {popupController?: (show: boo
                     <span>{props.data.sale_id}</span>
                 </div>
                 <div className="flex my-2 justify-between">
+                    <span className="text-gray-400">Pajak</span>
+                    <span>12%</span>
+                </div>
+                {props.data.customer_id ? <div className="flex my-2 justify-between">
+                    <span className="text-gray-400">Diskon Member</span>
+                    <span>5%</span>
+                </div> : null}
+                <div className="flex my-2 justify-between">
                     <span className="text-gray-400">Total</span>
                     <span>{formatCurrency(props.data.total_price!)}</span>
                 </div>

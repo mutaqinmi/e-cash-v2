@@ -1,6 +1,6 @@
 'use client'
 import Body from "@/src/components/body";
-import { CaretUpDown, PencilSimple, Plus, TrashSimple } from "@phosphor-icons/react";
+import { CaretUpDown, PencilSimple, Plus, ArchiveBox, Archive } from "@phosphor-icons/react";
 import SearchField from "../components/search-field";
 import IconButton from "../components/icon-button";
 import { formatCurrency } from "../lib/number-formatter";
@@ -21,8 +21,10 @@ interface ComponentState {
     setShowEditProductDialog: (show: boolean | null) => void;
     editedProductData: table.productType | null;
     setEditedProductData: (data: table.productType | null) => void;
-    showDeleteProductDialog: boolean | null;
-    setShowDeleteProductDialog: (show: boolean | null) => void;
+    showArchiveProductDialog: boolean | null;
+    setShowArchiveProductDialog: (show: boolean | null) => void;
+    showArchivedProductList: boolean | null;
+    setShowArchivedProductList: (show: boolean | null) => void;
 }
 
 interface ProductData {
@@ -41,8 +43,10 @@ const useComponent = create<ComponentState>((set) => ({
     setShowEditProductDialog: (show: boolean | null) => set(() => ({showEditProductDialog: show})),
     editedProductData: null,
     setEditedProductData: (data: table.productType | null) => set(() => ({editedProductData: data})),
-    showDeleteProductDialog: false,
-    setShowDeleteProductDialog: (show: boolean | null) => set(() => ({showDeleteProductDialog: show})),
+    showArchiveProductDialog: false,
+    setShowArchiveProductDialog: (show: boolean | null) => set(() => ({showArchiveProductDialog: show})),
+    showArchivedProductList: false,
+    setShowArchivedProductList: (show: boolean | null) => set(() => ({showArchivedProductList: show})),
 }));
 
 const useProductData = create<ProductData>((set) => ({
@@ -62,14 +66,16 @@ export default function Product(){
         setShowEditProductDialog,
         editedProductData,
         setEditedProductData,
-        showDeleteProductDialog,
-        setShowDeleteProductDialog,
+        showArchiveProductDialog,
+        setShowArchiveProductDialog,
+        showArchivedProductList,
+        setShowArchivedProductList
     } = useComponent();
     const {data, setData} = useProductData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
 
     const getAllProducts = useCallback(async () => {
-        return axios.get(`${process.env.API_URL}/product`).then((response) => {
+        return axios.get(`${process.env.API_URL}/product?status=true`).then((response) => {
             if(response.status === 200){
                 const data: table.productType[] = response.data;
                 setData(data);
@@ -108,12 +114,13 @@ export default function Product(){
         loadData();
     }, [loadData]);
 
-    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddProductDialog={showAddProductDialog} setShowAddProductDialog={setShowAddProductDialog} onDataChanged={loadData} showEditProductDialog={showEditProductDialog} setShowEditProductDialog={setShowEditProductDialog} editedProductData={editedProductData} showDeleteProductDialog={showDeleteProductDialog} setShowDeleteProductDialog={setShowDeleteProductDialog}>
+    return isLoading ? <Loading className="pt-20 pl-72 p-8"/> : <Body className="pt-20 pl-72 p-8" errorSnackBarMessage={errorSnackBarMessage} errorSnackBarController={setErrorSnackBarMessage} successSnackBarMessage={successSnackBarMessage} successSnackBarController={setSuccessSnackBarMessage} showAddProductDialog={showAddProductDialog} setShowAddProductDialog={setShowAddProductDialog} onDataChanged={loadData} showEditProductDialog={showEditProductDialog} setShowEditProductDialog={setShowEditProductDialog} editedProductData={editedProductData} showArchiveProductDialog={showArchiveProductDialog} setShowArchiveProductDialog={setShowArchiveProductDialog} showArchivedProductList={showArchivedProductList} setShowArchivedProductList={setShowArchivedProductList}>
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-3 bg-white p-4 rounded-lg">
                 <div className="flex gap-4 items-center">
                     <SearchField placeholder="Cari barang" onChange={searchHandler}/>
                     <IconButton icon={<Plus size={20}/>} label="Tambah Barang" onClick={() => setShowAddProductDialog(true)} className="py-2 px-3"/>
+                    <IconButton icon={<Archive size={24}/>} onClick={() => setShowArchivedProductList(true)} className="py-2 px-3"/>
                 </div>
                 {data.length ? <div className="mt-6">
                     <table className="w-full">
@@ -151,10 +158,10 @@ export default function Product(){
                                             setEditedProductData(product);
                                             setShowEditProductDialog(true);
                                         }} className="aspect-square p-1"/>
-                                        <IconButton icon={<TrashSimple size={16}/>} onClick={() => {
+                                        <IconButton icon={<ArchiveBox size={16}/>} onClick={() => {
                                             setEditedProductData(product);
-                                            setShowDeleteProductDialog(true);
-                                        }} className="bg-red-500 hover:bg-red-700 aspect-square p-1"/>
+                                            setShowArchiveProductDialog(true);
+                                        }} className="bg-orange-500 hover:bg-orange-700 aspect-square p-1"/>
                                     </td>
                                 </tr>
                             })}

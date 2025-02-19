@@ -8,12 +8,13 @@ import EditEmployeePassword from "./edit-employee-password";
 import DeleteEmployee from "./delete-employee";
 import AddProduct from "./add-product";
 import EditProduct from "./edit-product";
-import DeleteProduct from "./delete-product";
+import ArchiveProduct from "./archive-product";
 import AddCustomer from "./add-customer";
 import EditCustomer from "./edit-customer";
 import DeleteCustomer from "./delete-customer";
 import TransactionFinished from "./transaction-finished";
 import DetailTransaction from "./detail-transaction";
+import ArchiveProductList from "./archive-product-list";
 
 export default function Body(props: {
     className?: string;
@@ -37,8 +38,8 @@ export default function Body(props: {
     showEditProductDialog?: boolean | null;
     setShowEditProductDialog?: (show: boolean | null) => void;
     editedProductData?: table.productType | null;
-    showDeleteProductDialog?: boolean | null;
-    setShowDeleteProductDialog?: (show: boolean | null) => void;
+    showArchiveProductDialog?: boolean | null;
+    setShowArchiveProductDialog?: (show: boolean | null) => void;
     showAddCustomerDialog?: boolean | null;
     setShowAddCustomerDialog?: (show: boolean | null) => void;
     showEditCustomerDialog?: boolean | null;
@@ -52,6 +53,8 @@ export default function Body(props: {
     showSaleDetailDialog?: boolean | null;
     setShowSaleDetailDialog?: (show: boolean | null) => void;
     saleDetailID?: number | null;
+    showArchivedProductList?: boolean | null;
+    setShowArchivedProductList?: (show: boolean | null) => void;
 }){
     useEffect(() => {
         if (props.errorSnackBarMessage != null && props.successSnackBarMessage) {
@@ -72,12 +75,13 @@ export default function Body(props: {
             {props.showDeleteEmployeeDialog ? <DeleteEmployee popupController={props.setShowDeleteEmployeeDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedEmployeeData!} /> : null}
             {props.showAddProductDialog ? <AddProduct popupController={props.setShowAddProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} /> : null}
             {props.showEditProductDialog ? <EditProduct popupController={props.setShowEditProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedProductData!} /> : null}
-            {props.showDeleteProductDialog ? <DeleteProduct popupController={props.setShowDeleteProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedProductData!} /> : null}
+            {props.showArchiveProductDialog ? <ArchiveProduct popupController={props.setShowArchiveProductDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedProductData!} /> : null}
             {props.showAddCustomerDialog ? <AddCustomer popupController={props.setShowAddCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} /> : null}
             {props.showEditCustomerDialog ? <EditCustomer popupController={props.setShowEditCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
             {props.showDeleteCustomerDialog ? <DeleteCustomer popupController={props.setShowDeleteCustomerDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged} data={props.editedCustomerData!} /> : null}
             {props.showSuccessfullTransactionDialog ? <TransactionFinished popupController={props.setShowSuccessfullTransactionDialog} data={props.transactionData!} /> : null}
             {props.showSaleDetailDialog ? <DetailTransaction popupController={props.setShowSaleDetailDialog} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} sale_id={props.saleDetailID!} /> : null}
+            {props.showArchivedProductList ? <ArchiveProductList popupController={props.setShowArchivedProductList} successSnackbarController={props.successSnackBarController} errorSnackBarMessage={props.errorSnackBarController} onSuccess={props.onDataChanged}/> : null}
         </div>
     )
 }

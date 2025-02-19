@@ -32,7 +32,7 @@ export default function DetailTransaction(props: {popupController?: (show: boole
     }, [loadData]);
 
     return <div className="w-screen h-screen fixed top-0 left-0 z-50 bg-black bg-opacity-25 flex justify-center items-center">
-        <div className="w-[40rem] p-4 bg-white rounded-md relative">
+        <div className="w-[40rem] max-h-[80%] p-4 bg-white rounded-md relative">
             {isLoading ? <div className="flex justify-center items-center"><LoadingSpin className="h-6 w-6 border-[3px]"/></div> : <>
                 <div onClick={() => props.popupController!(false)} className="absolute top-4 right-4 p-2 bg-gray-100 text-gray-500 rounded-full">
                     <X/>
@@ -49,7 +49,15 @@ export default function DetailTransaction(props: {popupController?: (show: boole
                     <span className="text-gray-400">Total Belanja</span>
                     <span>{formatCurrency(data[0]?.sale.total_price ?? 0)}</span>
                 </div>
-                <div className="mt-4 overflow-auto max-h-[80%]">
+                <div className="flex my-2 justify-between">
+                    <span className="text-gray-400">Pajak</span>
+                    <span>12%</span>
+                </div>
+                {data[0]?.sale.customer_id ? <div className="flex my-2 justify-between">
+                    <span className="text-gray-400">Diskon Member</span>
+                    <span>5%</span>
+                </div> : null}
+                <div className="mt-4 overflow-auto">
                     <table className="w-full border-separate border-spacing-1">
                         <thead>
                             <tr>
@@ -77,7 +85,7 @@ export default function DetailTransaction(props: {popupController?: (show: boole
                         </thead>
                         <tbody>
                             {data.map((data: {sale: table.saleType, product: table.productType, saleDetail: table.saleDetailType}, index: number) => {
-                                return <tr key={index} className="text-center even:bg-gray-100 odd:bg-white">
+                                return <tr key={index} className="text-center even:bg-gray-100 even:bg-opacity-50 odd:bg-white">
                                     <td className="p-2">{data.product.product_name}</td>
                                     <td className="p-2">{formatCurrency(data.product.price!)}</td>
                                     <td className="p-2">{data.saleDetail.quantity}</td>

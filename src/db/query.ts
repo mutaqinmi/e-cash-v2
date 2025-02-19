@@ -1,4 +1,4 @@
-import { eq, ilike, or } from "drizzle-orm";
+import { and, asc, desc, eq, ilike, or } from "drizzle-orm";
 import { db } from "./index";
 import * as table from "./schema";
 
@@ -116,13 +116,29 @@ export class Product {
 
         async function search(keyword: string){
             try {
-                return await db.select().from(table.product).where(ilike(table.product.product_name, `%${keyword}%`));
+                return await db.select().from(table.product).where(and(ilike(table.product.product_name, `%${keyword}%`), eq(table.product.active, true)));
             } catch (error) {
                 console.error(error);
             }
         }
 
-        return { all, byId, search };
+        async function activeProduct(){
+            try {
+                return await db.select().from(table.product).where(eq(table.product.active, true));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        async function inactiveProduct(){
+            try {
+                return await db.select().from(table.product).where(eq(table.product.active, false));
+            } catch (error) {
+                console.error(error);
+            }
+        }
+
+        return { all, byId, search, activeProduct, inactiveProduct };
     }
 
     public static async create(product_name: string, price: number, stock: number) {
@@ -138,10 +154,9 @@ export class Product {
     }
 
     public static get update() {
-        async function data(product_id: number, product_name: string, price: number, stock: number){
+        async function data(product_id: number, price: number, stock: number){
             try {
                 return await db.update(table.product).set({
-                    product_name,
                     price,
                     stock
                 }).where(eq(table.product.product_id, product_id));
@@ -160,15 +175,17 @@ export class Product {
             }
         }
 
-        return { data, stock };
-    }
-
-    public static async delete(product_id: number) {
-        try {
-            return await db.delete(table.product).where(eq(table.product.product_id, product_id));
-        } catch (error) {
-            console.error(error);
+        async function status(product_id: number, active: boolean){
+            try {
+                return await db.update(table.product).set({
+                    active
+                }).where(eq(table.product.product_id, product_id));
+            } catch (error) {
+                console.error(error);
+            }
         }
+
+        return { data, stock, status };
     }
 }
 
@@ -264,7 +281,7 @@ export class Transaction {
     }
 
     public static get create() {
-        async function newTransaction(sale_date: string, total_price: number, customer_id: number, employee_id: number){
+        async function newTransaction(sale_date: string, total_price: number, customer_id: number | null, employee_id: number){
             try {
                 return await db.insert(table.sale).values({
                     sale_date,

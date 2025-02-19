@@ -7,7 +7,7 @@ import { formatCurrency } from "../lib/number-formatter";
 import Form from "next/form";
 import Button from "../components/button";
 import { create } from "zustand";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import axios from "axios";
 import * as table from "@/src/db/schema";
 import HorizontalDivider from "../components/horizontal-divider";
@@ -28,8 +28,8 @@ interface Component {
     setErrorSnackBarMessage: (message: string | null) => void;
     successSnackBarMessage: string | null;
     setSuccessSnackBarMessage: (message: string | null) => void;
-    dataCustomer: table.customerType[];
-    setDataCustomer: (value: table.customerType[]) => void;
+    dataCustomer: table.customerType[] | null;
+    setDataCustomer: (value: table.customerType[] | null) => void;
     showAddCustomerDialog?: boolean | null;
     setShowAddCustomerDialog?: (value: boolean | null) => void;
     showSuccessfullTransactionDialog: boolean | null;
@@ -45,6 +45,8 @@ interface ProductData {
     setCart: (value: ProductItem[]) => void;
     total: number;
     setTotal: (value: number) => void;
+    totalDiscounted: number | null;
+    setTotalDiscounted: (value: number | null) => void;
 }
 
 const useComponent =  create<Component>((set) => ({
@@ -52,8 +54,8 @@ const useComponent =  create<Component>((set) => ({
     setErrorSnackBarMessage: (message: string | null) => set(() => ({errorSnackBarMessage: message})),
     successSnackBarMessage: null,
     setSuccessSnackBarMessage: (message: string | null) => set(() => ({successSnackBarMessage: message})),
-    dataCustomer: [],
-    setDataCustomer: (value: table.customerType[]) => set(() => ({dataCustomer: value})),
+    dataCustomer: null,
+    setDataCustomer: (value: table.customerType[] | null) => set(() => ({dataCustomer: value})),
     showAddCustomerDialog: false,
     setShowAddCustomerDialog: (value: boolean | null) => set(() => ({showAddCustomerDialog: value})),
     showSuccessfullTransactionDialog: false,
@@ -69,6 +71,8 @@ const useProductData = create<ProductData>((set) => ({
     setCart: (value: ProductItem[]) => set(() => ({cart: value})),
     total: 0,
     setTotal: (value: number) => set(() => ({total: value})),
+    totalDiscounted: null,
+    setTotalDiscounted: (value: number | null) => set(() => ({totalDiscounted: value})),
 }));
 
 export default function Cashier(){
@@ -92,10 +96,13 @@ export default function Cashier(){
         cart,
         setCart,
         total,
-        setTotal
+        setTotal,
+        totalDiscounted,
+        setTotalDiscounted
     } = useProductData();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isMemberLoading, setIsMemberLoading] = useState<boolean>(false);
+    const searchField = useRef<HTMLInputElement | null>(null);
 
     const searchProduct = useCallback(async (searchQuery: string) => {
         return await axios.get(`${process.env.API_URL}/product?search=${searchQuery}`).then((response) => {
@@ -147,7 +154,7 @@ export default function Cashier(){
         localStorage.setItem("cart", JSON.stringify(cart));
         setCart(cart);
         getTotalPayment(cart);
-        setDataCustomer([]);
+        setDataCustomer(null);
     }
 
     const increaseProductQuantityHandler = (index: number) => {
@@ -186,19 +193,21 @@ export default function Cashier(){
 
     const getTotalPayment = (cart: ProductItem[]) => {
         let total = 0;
-
+        
         cart.forEach((product: ProductItem) => {
             total += product.subtotal;
         });
-
-        setTotal(total);
+        
+        const tax = (total / 100) * 12;
+        setTotal(total + tax);
     }
 
     const getMemberData = useCallback(async (formData: FormData) => {
         return await axios.get(`${process.env.API_URL}/customer?phone_number=${formData.get("membership") as string}`).then((response) => {
             if(response.status === 200){
                 const data: table.customerType[] = response.data;
-                if(!data.length) return setErrorSnackBarMessage("Pelanggan tidak ditemukan");
+                const total = formData.get("total") as unknown as number;
+                setTotalDiscounted(total - ((total / 100) * 5));
                 setDataCustomer(data);
             }
         }).catch((error) => {
@@ -207,8 +216,7 @@ export default function Cashier(){
         }).finally(() => setIsMemberLoading(false));
     }, []);
 
-    const newTransactionHandler = useCallback(async (cart: ProductItem[], total: number, customer_id: number) => {
-        if(customer_id === 0) return setErrorSnackBarMessage("Pelanggan tidak ditemukan");
+    const newTransactionHandler = useCallback(async (cart: ProductItem[], total: number, customer_id: number | null) => {
         return await axios.post(`${process.env.API_URL}/transaction`, {
             cart,
             total,
@@ -228,6 +236,7 @@ export default function Cashier(){
             setCart([]);
             setTotal(0);
             setDataCustomer([]);
+            setTotalDiscounted(null);
         });
     }, [])
 
@@ -251,7 +260,29 @@ export default function Cashier(){
         <div className="grid grid-cols-3 gap-4">
             <div className="col-span-2 max-h-fit bg-white p-4 rounded-lg">
                 <div className="flex flex-col gap-4 relative">
-                    <SearchField placeholder="Cari barang ..." autoFocus onChange={searchHandler}/>
+                    <SearchField useRef={searchField} placeholder="Cari barang ..." autoFocus onChange={searchHandler} onKeyDown={(e) => {
+                        if(e.key === "Enter"){
+                            e.preventDefault();
+                            addProductToCartHandler({
+                                product_id: data[0].product_id,
+                                product_name: data[0].product_name!,
+                                price: data[0].price!,
+                                stock: data[0].stock!,
+                                quantity: 1,
+                                subtotal: data[0].price! * 1
+                            });
+                            setData([]);
+                            getTotalPayment([...cart, {
+                                product_id: data[0].product_id,
+                                product_name: data[0].product_name!,
+                                price: data[0].price!,
+                                stock: data[0].stock!,
+                                quantity: 1,
+                                subtotal: data[0].price! * 1
+                            }]);
+                            e.currentTarget.value = "";
+                        }
+                    }}/>
                     {isLoading ? <div className="absolute top-12 bg-white px-2 py-3 rounded-md w-full shadow-md flex justify-center items-center"><LoadingSpin className="h-6 w-6 border-[3px]"/></div> : data.length ? <div className="absolute top-12 bg-white px-4 py-2 rounded-md w-full shadow-md">
                         {data.map((product: table.productType, index: number) => {
                             return <div key={index} className="flex flex-col gap-2 my-2 hover:bg-gray-100" onClick={() => {
@@ -272,6 +303,10 @@ export default function Cashier(){
                                     quantity: 1,
                                     subtotal: product.price! * 1
                                 }]);
+
+                                if (searchField.current) {
+                                    searchField.current.value = "";
+                                }
                             }}>
                                 <div className={`w-full grid grid-cols-3 ${data.length > 1 ? "pt-2" : "py-2"} px-2 cursor-pointer`}>
                                     <span className="col-span-1">{product.product_name}</span>
@@ -316,9 +351,9 @@ export default function Cashier(){
                                     <td className="p-2">{product.product_name}</td>
                                     <td className="p-2">{formatCurrency(product.price!)}</td>
                                     <td className="p-2 flex gap-3 items-center justify-center">
-                                        <IconButton icon={<Plus size={10} weight="bold"/>} onClick={() => increaseProductQuantityHandler(index)} className="aspect-square px-1 py-1"/>
-                                        <span>{product.quantity}</span>
                                         <IconButton icon={<Minus size={10} weight="bold"/>} onClick={() => decreaseProductQuantityHandler(index)} className="aspect-square px-1 py-1"/>
+                                        <span>{product.quantity}</span>
+                                        <IconButton icon={<Plus size={10} weight="bold"/>} onClick={() => increaseProductQuantityHandler(index)} className="aspect-square px-1 py-1"/>
                                     </td>
                                     <td className="p-2">{formatCurrency(product.subtotal ?? 0)}</td>
                                     <td className="p-2 flex gap-2 justify-center items-center">
@@ -336,15 +371,16 @@ export default function Cashier(){
                     <h1 className="text-4xl font-semibold mt-2">{formatCurrency(total)}</h1>
                 </div>
                 {cart.length ? <div className="bg-white p-4 rounded-lg">
-                    <Form action={getMemberDataHandler} formMethod="GET">
+                    <Form action={getMemberDataHandler} formMethod="GET" className="mb-4">
                         <div className="flex gap-2 justify-between items-center">
                             <div className="w-full relative">
+                                <input type="hidden" name="total" id="total" defaultValue={total}/>
                                 <PhoneField label="Membership"/>
                                 <IconButton icon={<CaretRight size={12} weight="bold"/>} className="!h-fit p-3 aspect-square absolute top-1/2 right-2 -translate-y-1/2" formButton/>
                             </div>
                             <IconButton icon={<UserPlus size={24} weight="bold"/>} className="p-3" onClick={() => setShowAddCustomerDialog!(true)}/>
                         </div>
-                        {isMemberLoading ? <div className="flex justify-center items-center"><LoadingSpin className="h-6 w-6 border-[3px]"/></div> : dataCustomer.length && cart.length ? <div>
+                        {isMemberLoading ? <div className="flex justify-center items-center"><LoadingSpin className="h-6 w-6 border-[3px]"/></div> : dataCustomer && dataCustomer.length && cart.length ? <div>
                             {dataCustomer.map((customer: table.customerType, index: number) => {
                                 return <div key={index} className="flex flex-col gap-2">
                                     <div className="flex justify-between items-center">
@@ -357,14 +393,13 @@ export default function Cashier(){
                                     </div>
                                     <div className="flex justify-between items-center">
                                         <span className="text-gray-400">Total Bayar</span>
-                                        <span className="font-semibold">{formatCurrency(total - ((total / 100) * 5))}</span>
+                                        <span className="font-semibold">{formatCurrency(totalDiscounted!)}</span>
                                     </div>
                                 </div>
                             })}
                         </div> : null}
                     </Form>
-                    <HorizontalDivider className="border-gray-100 my-4"/>
-                    <Form action={() => newTransactionHandler(cart, total, dataCustomer[0]?.customer_id ?? 0)} formMethod="POST" className="mt-2">
+                    <Form action={() => newTransactionHandler(cart, totalDiscounted?? total, dataCustomer ? dataCustomer[0].customer_id : null)} formMethod="POST" className="mt-2">
                         <Button className="w-full" label="Bayar" formButton/>
                     </Form>
                 </div> : null}
